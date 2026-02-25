@@ -22,45 +22,39 @@ dependencies {
     val exposedVer = "0.61.0"
     val logVer = "1.5.32"
 
-    // Telegram Bot
     implementation("io.github.kotlin-telegram-bot.kotlin-telegram-bot:telegram:${botApiVer}")
-
-    // Ktor Server
     implementation("io.ktor:ktor-server-netty:${ktorVer}")
     implementation("io.ktor:ktor-server-content-negotiation:${ktorVer}")
     implementation("io.ktor:ktor-serialization-kotlinx-json:${ktorVer}")
     implementation("io.ktor:ktor-server-auth:${ktorVer}")
     implementation("io.ktor:ktor-server-cors:${ktorVer}")
-
-    // Ktor Client (for scrapers)
     implementation("io.ktor:ktor-client-core:${ktorVer}")
     implementation("io.ktor:ktor-client-cio:${ktorVer}")
     implementation("io.ktor:ktor-client-content-negotiation:${ktorVer}")
-
-    // SQLite + Exposed
     implementation("org.jetbrains.exposed:exposed-core:${exposedVer}")
     implementation("org.jetbrains.exposed:exposed-dao:${exposedVer}")
     implementation("org.jetbrains.exposed:exposed-jdbc:${exposedVer}")
     implementation("org.jetbrains.exposed:exposed-java-time:${exposedVer}")
-    implementation("org.xerial:sqlite-jdbc:3.49.1.0")
-
-    // MongoDB
-    implementation("org.litote.kmongo:kmongo-coroutine-serialization:5.2.0")
-
-    // Dotenv
+    implementation("org.postgresql:postgresql:42.7.4")
+    testImplementation("org.xerial:sqlite-jdbc:3.49.1.0")
     implementation("io.github.cdimascio:dotenv-kotlin:6.5.0")
-
-    // Logging
+    implementation("org.jsoup:jsoup:1.18.3")
     implementation("ch.qos.logback:logback-classic:${logVer}")
-
-    // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
-
     testImplementation(kotlin("test"))
+    testImplementation("io.mockk:mockk:1.13.13")
+    testImplementation("io.ktor:ktor-client-mock:${ktorVer}")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.1")
 }
 
 tasks.test {
     useJUnitPlatform()
+    jvmArgs(
+        "-Dnet.bytebuddy.experimental=true",
+        "--add-opens", "java.base/java.lang=ALL-UNNAMED",
+        "--add-opens", "java.base/java.util=ALL-UNNAMED",
+        "--add-opens", "java.base/java.lang.reflect=ALL-UNNAMED"
+    )
 }
 kotlin {
     jvmToolchain(24)

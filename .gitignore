@@ -54,3 +54,4 @@ admin-frontend/dist/
 /data/srbestate.db
 /.idea/
 /.claude/
+/rules/

@@ -1,29 +1,18 @@
 package com.jmvstv_v.model
 
-import kotlinx.serialization.Contextual
-import kotlinx.serialization.Serializable
-import org.bson.types.ObjectId
+import org.jetbrains.exposed.sql.Table
 
-@Serializable
+object SitesTable : Table("sites") {
+    val id      = integer("id")
+    val name    = varchar("name", 64).uniqueIndex()
+    val address = varchar("address", 256)
+    val active  = bool("active").default(true)
+    override val primaryKey = PrimaryKey(id)
+}
+
 data class Site(
-    @Contextual val _id: ObjectId = ObjectId(),
+    val id: Int,
     val name: String,
-    val baseUrl: String,
-    val enabled: Boolean = true
-)
-
-@Serializable
-data class SiteDto(
-    val id: String? = null,
-    val name: String,
-    val baseUrl: String,
-    val enabled: Boolean = true
-)
-
-fun Site.toDto() = SiteDto(id = _id.toHexString(), name = name, baseUrl = baseUrl, enabled = enabled)
-fun SiteDto.toEntity() = Site(
-    _id = if (id != null) ObjectId(id) else ObjectId(),
-    name = name,
-    baseUrl = baseUrl,
-    enabled = enabled
+    val address: String,
+    val active: Boolean = true
 )
