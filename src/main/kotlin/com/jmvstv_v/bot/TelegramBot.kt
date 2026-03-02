@@ -10,8 +10,10 @@ import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.InlineKeyboardMarkup
 import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
 import com.jmvstv_v.config.AppConfig
+import com.jmvstv_v.model.UserFilterEntry
 import com.jmvstv_v.repository.FilterRepository
 import com.jmvstv_v.repository.UserRepository
+import com.jmvstv_v.scraper.CollectScheduler
 
 /**
  * Builds and configures the Telegram bot with all command and callback handlers.
@@ -24,7 +26,8 @@ import com.jmvstv_v.repository.UserRepository
 fun buildTelegramBot(
     userRepository: UserRepository,
     filterRepository: FilterRepository,
-    conversation: FilterConversation
+    conversation: FilterConversation,
+    collectScheduler: CollectScheduler
 ): Bot = bot {
     token = AppConfig.telegramBotToken
     dispatch {
@@ -99,6 +102,7 @@ fun buildTelegramBot(
             }
 
             filterRepository.setActiveFilter(userId, filterId)
+            collectScheduler.runForUser(UserFilterEntry(chatId, userId, filter))
             bot.answerCallbackQuery(callbackQuery.id, text = "Фильтр «${filter.name}» активирован")
             if (messageId != null) bot.deleteMessage(ChatId.fromId(chatId), messageId)
         }

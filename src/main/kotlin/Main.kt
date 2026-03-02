@@ -46,9 +46,9 @@ fun main() {
         NekretninProcessor
     )
 
-    val telegramBot = buildTelegramBot(userRepository, filterRepository, conversation)
-
     val collectScheduler = CollectScheduler(processors, seenListingsRepository, userRepository, siteRepository)
+
+    val telegramBot = buildTelegramBot(userRepository, filterRepository, conversation, collectScheduler)
     collectScheduler.start(telegramBot)
     Runtime.getRuntime().addShutdownHook(Thread { collectScheduler.stop() })
 
