@@ -36,6 +36,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-jdbc:${exposedVer}")
     implementation("org.jetbrains.exposed:exposed-java-time:${exposedVer}")
     implementation("org.postgresql:postgresql:42.7.4")
+    implementation("org.liquibase:liquibase-core:4.29.2")
     testImplementation("org.xerial:sqlite-jdbc:3.49.1.0")
     implementation("io.github.cdimascio:dotenv-kotlin:6.5.0")
     implementation("org.jsoup:jsoup:1.18.3")

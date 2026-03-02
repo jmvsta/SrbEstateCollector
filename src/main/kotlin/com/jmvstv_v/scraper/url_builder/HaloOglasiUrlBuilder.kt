@@ -37,7 +37,7 @@ object HaloOglasiUrlBuilder {
     fun build(filter: Filter): String {
         val citySlug  = City.fromCode(filter.city)?.displayName ?: "beograd"
         val isExact   = filter.minRooms != null && (filter.maxRooms == null || filter.minRooms == filter.maxRooms)
-        val roomSlug  = if (isExact) ROOM_WORD[filter.minRooms] else null
+        val roomSlug  = if (isExact) ROOM_WORD[filter.minRooms?.toInt()] else null
 
         val params = buildList {
             filter.maxPrice?.let { add("cena_d_to=$it"); add("cena_d_unit=4") }
@@ -46,8 +46,8 @@ object HaloOglasiUrlBuilder {
             filter.maxArea?.let  { add("kvadratura_d_to=$it") }
 
             if (!isExact) {
-                filter.minRooms?.let { ROOM_CODE[it]?.let { c -> add("broj_soba_order_i_from=$c") } }
-                filter.maxRooms?.let { ROOM_CODE[it]?.let { c -> add("broj_soba_order_i_to=$c") } }
+                filter.minRooms?.let { ROOM_CODE[it.toInt()]?.let { c -> add("broj_soba_order_i_from=$c") } }
+                filter.maxRooms?.let { ROOM_CODE[it.toInt()]?.let { c -> add("broj_soba_order_i_to=$c") } }
             }
 
             val advertisers = when (filter.adType) {

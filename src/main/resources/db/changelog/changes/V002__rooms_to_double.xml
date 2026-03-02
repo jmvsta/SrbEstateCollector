@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="V002-rooms-to-double" author="com.jmvstv_v">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="integer">
+                SELECT data_type FROM information_schema.columns
+                WHERE table_name = 'filters' AND column_name = 'min_rooms'
+            </sqlCheck>
+        </preConditions>
+        <modifyDataType tableName="filters" columnName="min_rooms" newDataType="DOUBLE PRECISION"/>
+        <modifyDataType tableName="filters" columnName="max_rooms" newDataType="DOUBLE PRECISION"/>
+        <rollback>
+            <modifyDataType tableName="filters" columnName="min_rooms" newDataType="INT"/>
+            <modifyDataType tableName="filters" columnName="max_rooms" newDataType="INT"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

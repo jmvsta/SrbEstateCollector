@@ -4,6 +4,7 @@ import com.jmvstv_v.model.AdType
 import com.jmvstv_v.model.City
 import com.jmvstv_v.model.Filter
 import com.jmvstv_v.model.Heating
+import kotlin.math.roundToInt
 
 /**
  * Builds search URLs for 4zida.rs from a [Filter].
@@ -64,10 +65,10 @@ object FourZidaUrlBuilder {
      * @param maxRooms Maximum room count, or `null` to use [minRooms] as exact value.
      * @return List of 4zida structure slug strings.
      */
-    private fun buildStructures(minRooms: Int?, maxRooms: Int?): List<String> {
+    private fun buildStructures(minRooms: Double?, maxRooms: Double?): List<String> {
         if (minRooms == null) return emptyList()
-        val start = maxOf(1, minRooms * 2)
-        val end   = maxOf(1, (maxRooms ?: minRooms) * 2)
+        val start = maxOf(1, (minRooms * 2).roundToInt())
+        val end   = maxOf(1, ((maxRooms ?: minRooms) * 2).roundToInt())
         return (start..end).mapNotNull { STRUCTURE_NAMES[it] }
     }
 

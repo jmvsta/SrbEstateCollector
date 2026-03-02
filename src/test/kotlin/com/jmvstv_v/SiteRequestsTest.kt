@@ -88,7 +88,7 @@ class SiteRequestsTest {
 
     @Test
     fun `CityExpertUrlBuilder embeds price and structure params`() {
-        val filter = minimalFilter(minPrice = 300, maxPrice = 900, minRooms = 1, maxRooms = 2)
+        val filter = minimalFilter(minPrice = 300, maxPrice = 900, minRooms = 1.0, maxRooms = 2.0)
         val url = CityExpertUrlBuilder.build(filter)
         assertTrue(url.contains("minPrice=300"), url)
         assertTrue(url.contains("maxPrice=900"), url)
@@ -152,8 +152,8 @@ class SiteRequestsTest {
     private fun minimalFilter(
         minPrice: Int? = null,
         maxPrice: Int? = null,
-        minRooms: Int? = null,
-        maxRooms: Int? = null
+        minRooms: Double? = null,
+        maxRooms: Double? = null
     ) = com.jmvstv_v.model.Filter(
         id = 1,
         name = "Test",

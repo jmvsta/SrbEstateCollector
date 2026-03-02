@@ -60,8 +60,8 @@ data class Filter(
     val active: Boolean = false,
     val city: Int? = null,
     val propertyType: String? = null,
-    val minRooms: Int? = null,
-    val maxRooms: Int? = null,
+    val minRooms: Double? = null,
+    val maxRooms: Double? = null,
     val minPrice: Int? = null,
     val maxPrice: Int? = null,
     val minArea: Int? = null,
@@ -102,8 +102,8 @@ object FiltersTable : Table("filters") {
     val active       = bool("active").default(false)
     val city         = integer("city").nullable()
     val propertyType = varchar("property_type", 50).nullable()
-    val minRooms     = integer("min_rooms").nullable()
-    val maxRooms     = integer("max_rooms").nullable()
+    val minRooms     = double("min_rooms").nullable()
+    val maxRooms     = double("max_rooms").nullable()
     val minPrice     = integer("min_price").nullable()
     val maxPrice     = integer("max_price").nullable()
     val minArea      = integer("min_area").nullable()

@@ -1,25 +1,28 @@
 package com.jmvstv_v.db
 
 import com.jmvstv_v.config.AppConfig
-import com.jmvstv_v.model.FiltersTable
-import com.jmvstv_v.model.SeenListingsTable
-import com.jmvstv_v.model.SitesTable
-import com.jmvstv_v.model.UsersTable
+import liquibase.Liquibase
+import liquibase.database.DatabaseFactory
+import liquibase.database.jvm.JdbcConnection
+import liquibase.resource.ClassLoaderResourceAccessor
 import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.transactions.transaction
+import java.sql.DriverManager
 
 object AppDatabase {
 
     fun init() {
+        val jdbcUrl = "jdbc:postgresql://${AppConfig.dbHost}:${AppConfig.dbPort}/${AppConfig.dbName}"
+        DriverManager.getConnection(jdbcUrl, AppConfig.dbUser, AppConfig.dbPassword).use { conn ->
+            val db = DatabaseFactory.getInstance()
+                .findCorrectDatabaseImplementation(JdbcConnection(conn))
+            Liquibase("db/changelog/db.changelog-master.xml", ClassLoaderResourceAccessor(), db)
+                .update("")
+        }
         Database.connect(
-            url      = "jdbc:postgresql://${AppConfig.dbHost}:${AppConfig.dbPort}/${AppConfig.dbName}",
+            url      = jdbcUrl,
             driver   = "org.postgresql.Driver",
             user     = AppConfig.dbUser,
             password = AppConfig.dbPassword
         )
-        transaction {
-            SchemaUtils.create(UsersTable, FiltersTable, SeenListingsTable, SitesTable)
-        }
     }
 }
