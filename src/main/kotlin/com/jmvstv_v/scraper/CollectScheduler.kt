@@ -74,6 +74,11 @@ class CollectScheduler(
         client.close()
     }
 
+    fun runForUser(entry: UserFilterEntry) {
+        val activeProcessors = processors.filter { it.sourceName in siteRepository.findActiveNames() }
+        scope.launch { processUser(entry, activeProcessors) }
+    }
+
     private fun runTick() {
         val activeNames = siteRepository.findActiveNames()
         val activeProcessors = processors.filter { it.sourceName in activeNames }
