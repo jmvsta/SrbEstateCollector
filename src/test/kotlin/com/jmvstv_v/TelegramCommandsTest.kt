@@ -396,7 +396,7 @@ class TelegramCommandsTest {
         filterConversation.handle(bot, testChatId, testTgId, "abc")
 
         assertTrue(filterConversation.isActive(testChatId))
-        verify { bot.sendMessage(ChatId.fromId(testChatId), "Введите число или диапазон (например: 2 или 1-3):") }
+        verify { bot.sendMessage(ChatId.fromId(testChatId), "Введите число или диапазон с шагом 0.5 (например: 2 или 1.5-3):") }
     }
 
     @Test
