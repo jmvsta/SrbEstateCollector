@@ -71,10 +71,11 @@ object NekretninUrlBuilder {
      * @param maxRooms Maximum room count, or `null` to use [minRooms] as exact value.
      * @return Joined slug string, or `null` when [minRooms] is `null`.
      */
-    private fun buildRoomSlugs(minRooms: Int?, maxRooms: Int?): String? {
+    private fun buildRoomSlugs(minRooms: Double?, maxRooms: Double?): String? {
         if (minRooms == null) return null
-        val max = maxRooms ?: minRooms
-        return (minRooms..max)
+        val minInt = minRooms.toInt()
+        val maxInt = (maxRooms ?: minRooms).toInt()
+        return (minInt..maxInt)
             .mapNotNull { rooms -> ROOM_SLUGS[rooms.coerceAtMost(6)] }
             .distinct()
             .joinToString("_")

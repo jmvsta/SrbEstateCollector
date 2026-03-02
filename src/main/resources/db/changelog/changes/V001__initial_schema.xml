@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <!-- users -->
+    <changeSet id="V001-create-users" author="com.jmvstv_v">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="users"/></not>
+        </preConditions>
+        <createTable tableName="users">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="telegram_id" type="BIGINT">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="chat_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="username" type="VARCHAR(255)"/>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="now()">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- sites -->
+    <changeSet id="V001-create-sites" author="com.jmvstv_v">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="sites"/></not>
+        </preConditions>
+        <createTable tableName="sites">
+            <column name="id" type="INT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(64)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="address" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- filters (min_rooms / max_rooms start as INT; V002 changes them to DOUBLE PRECISION) -->
+    <changeSet id="V001-create-filters" author="com.jmvstv_v">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="filters"/></not>
+        </preConditions>
+        <createTable tableName="filters">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="city" type="INT"/>
+            <column name="property_type" type="VARCHAR(50)"/>
+            <column name="min_rooms" type="INT"/>
+            <column name="max_rooms" type="INT"/>
+            <column name="min_price" type="INT"/>
+            <column name="max_price" type="INT"/>
+            <column name="min_area" type="INT"/>
+            <column name="max_area" type="INT"/>
+            <column name="ad_type" type="INT"/>
+            <column name="heating" type="INT"/>
+        </createTable>
+        <addForeignKeyConstraint
+            baseTableName="filters" baseColumnNames="user_id"
+            referencedTableName="users" referencedColumnNames="id"
+            constraintName="fk_filters_user_id"/>
+    </changeSet>
+
+    <!-- seen_listings -->
+    <changeSet id="V001-create-seen-listings" author="com.jmvstv_v">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="seen_listings"/></not>
+        </preConditions>
+        <createTable tableName="seen_listings">
+            <column name="user_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="filter_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="unique_id" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="seen_at" type="TIMESTAMP" defaultValueComputed="now()">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title" type="VARCHAR(512)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="url" type="VARCHAR(1024)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="city" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="property_type" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price" type="INT"/>
+            <column name="area" type="INT"/>
+            <column name="advertiser_type" type="VARCHAR(64)"/>
+            <column name="heating_type" type="VARCHAR(64)"/>
+        </createTable>
+        <addPrimaryKey tableName="seen_listings"
+            columnNames="filter_id,source,unique_id"
+            constraintName="pk_seen_listings"/>
+        <addForeignKeyConstraint
+            baseTableName="seen_listings" baseColumnNames="user_id"
+            referencedTableName="users" referencedColumnNames="id"
+            constraintName="fk_seen_listings_user_id"/>
+        <addForeignKeyConstraint
+            baseTableName="seen_listings" baseColumnNames="filter_id"
+            referencedTableName="filters" referencedColumnNames="id"
+            constraintName="fk_seen_listings_filter_id"/>
+    </changeSet>
+
+</databaseChangeLog>

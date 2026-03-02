@@ -2,6 +2,7 @@ package com.jmvstv_v.scraper.url_builder
 
 import com.jmvstv_v.model.City
 import com.jmvstv_v.model.Filter
+import kotlin.math.roundToInt
 
 /**
  * Builds search URLs for cityexpert.rs from a [Filter].
@@ -54,10 +55,10 @@ object CityExpertUrlBuilder {
      * @param maxRooms Maximum room count, or `null` to use [minRooms] as exact value.
      * @return List of CityExpert structure strings.
      */
-    private fun buildStructure(minRooms: Int?, maxRooms: Int?): List<String> {
+    private fun buildStructure(minRooms: Double?, maxRooms: Double?): List<String> {
         if (minRooms == null) return emptyList()
-        val start = maxOf(1, minRooms * 2)
-        val end   = maxOf(1, (maxRooms ?: minRooms) * 2)
+        val start = maxOf(1, (minRooms * 2).roundToInt())
+        val end   = maxOf(1, ((maxRooms ?: minRooms) * 2).roundToInt())
         return (start..end).map { halfUnits ->
             val whole = halfUnits / 2
             if (halfUnits % 2 == 0) "$whole.0" else "$whole.5"

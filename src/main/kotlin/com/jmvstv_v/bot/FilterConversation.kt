@@ -372,7 +372,8 @@ class FilterConversation(
 
             FilterStep.EDIT_NAME -> {
                 if (trimmed.isEmpty()) {
-                    bot.sendMessage(ChatId.fromId(chatId), "Название не может быть пустым:")
+                    sendPromptMessage(bot, chatId, draft, "Название не может быть пустым:",
+                        InlineKeyboardMarkup.create(listOf(listOf(btn("↩ Назад", "backtocard")))))
                     return
                 }
                 draft.name = trimmed
@@ -392,7 +393,8 @@ class FilterConversation(
                 }
                 val range = parseIntRange(trimmed)
                 if (range == null) {
-                    bot.sendMessage(ChatId.fromId(chatId), "Введите число или диапазон (например: 400-800 или 400), или нажмите «$SKIP» для сброса:")
+                    sendPromptMessage(bot, chatId, draft, "Введите число или диапазон (например: 400-800 или 400), или нажмите «$SKIP» для сброса:",
+                        InlineKeyboardMarkup.create(listOf(listOf(btn("Пропустить (сбросить)", "skipfield"), btn("↩ Назад", "backtocard")))))
                     return
                 }
                 draft.minPrice = range.first
@@ -409,7 +411,8 @@ class FilterConversation(
                 }
                 val range = parseIntRange(trimmed)
                 if (range == null) {
-                    bot.sendMessage(ChatId.fromId(chatId), "Введите число или диапазон (например: 40-120 или 40), или нажмите «$SKIP» для сброса:")
+                    sendPromptMessage(bot, chatId, draft, "Введите число или диапазон (например: 40-120 или 40), или нажмите «$SKIP» для сброса:",
+                        InlineKeyboardMarkup.create(listOf(listOf(btn("Пропустить (сбросить)", "skipfield"), btn("↩ Назад", "backtocard")))))
                     return
                 }
                 draft.minArea = range.first
@@ -522,8 +525,8 @@ class FilterConversation(
             ?: "любой"
 
         val roomsLabel = when {
-            draft.minRooms != null && draft.maxRooms != null -> "${draft.minRooms}-${draft.maxRooms}"
-            draft.minRooms != null                           -> "${draft.minRooms}"
+            draft.minRooms != null && draft.maxRooms != null -> "${draft.minRooms!!.fmtRooms()}-${draft.maxRooms!!.fmtRooms()}"
+            draft.minRooms != null                           -> draft.minRooms!!.fmtRooms()
             else                                             -> "любое"
         }
 
@@ -613,15 +616,23 @@ class FilterConversation(
 
     private fun btn(text: String, data: String) = InlineKeyboardButton.CallbackData(text = text, callbackData = data)
 
-    /** Sends a message and, for new-filter creation (editingFilterId == null), tracks its ID for bulk deletion on save. */
+    /** Sends a message. In creation mode tracks ID for bulk deletion; in edit mode replaces promptMessageId. */
     private fun sendCreationMessage(bot: Bot, chatId: Long, draft: FilterDraft, text: String, replyMarkup: ReplyMarkup? = null) {
+        if (draft.editingFilterId != null) {
+            val prevId = draft.promptMessageId
+            if (prevId != null) bot.deleteMessage(ChatId.fromId(chatId), prevId)
+            draft.promptMessageId = null
+        }
         val result = bot.sendMessage(chatId = ChatId.fromId(chatId), text = text, replyMarkup = replyMarkup)
-        if (draft.editingFilterId != null) return
         val msgId = try {
             result.javaClass.getDeclaredField("value").also { it.isAccessible = true }.get(result)
                 ?.let { msg -> msg.javaClass.getDeclaredField("messageId").also { it.isAccessible = true }.get(msg) as? Long }
         } catch (_: Exception) { null }
-        if (msgId != null) draft.creationMessageIds.add(msgId)
+        if (draft.editingFilterId != null) {
+            draft.promptMessageId = msgId
+        } else if (msgId != null) {
+            draft.creationMessageIds.add(msgId)
+        }
     }
 
     private fun handleRoomsInput(
@@ -637,18 +648,16 @@ class FilterConversation(
             onSuccess()
             return
         }
-        if (!trimmed.matches(Regex("\\d+(-\\d+)?"))) {
-            sendCreationMessage(bot, chatId, draft, "Введите число или диапазон (например: 2 или 1-3):")
-            return
-        }
+        val part = Regex("^\\d+(\\.5)?$")
+        val errorMsg = "Введите число или диапазон с шагом 0.5 (например: 2 или 1.5-3):"
         if (trimmed.contains('-')) {
             val parts = trimmed.split('-')
-            val min = parts[0].toInt()
-            val max = parts[1].toInt()
-            if (min < 0 || max < 0) {
-                sendCreationMessage(bot, chatId, draft, "Количество комнат не может быть отрицательным. Введите диапазон:")
+            if (parts.size != 2 || !parts[0].matches(part) || !parts[1].matches(part)) {
+                sendCreationMessage(bot, chatId, draft, errorMsg)
                 return
             }
+            val min = parts[0].toDouble()
+            val max = parts[1].toDouble()
             if (max < min) {
                 sendCreationMessage(bot, chatId, draft, "Максимум должен быть >= минимума. Введите диапазон:")
                 return
@@ -656,16 +665,17 @@ class FilterConversation(
             draft.minRooms = min
             draft.maxRooms = max
         } else {
-            val count = trimmed.toInt()
-            if (count < 0) {
-                sendCreationMessage(bot, chatId, draft, "Количество комнат не может быть отрицательным. Введите число:")
+            if (!trimmed.matches(part)) {
+                sendCreationMessage(bot, chatId, draft, errorMsg)
                 return
             }
-            draft.minRooms = count
+            draft.minRooms = trimmed.toDouble()
             draft.maxRooms = null
         }
         onSuccess()
     }
+
+    private fun Double.fmtRooms() = if (this % 1.0 == 0.0) this.toInt().toString() else this.toString()
 
     private fun parseIntRange(input: String): Pair<Int, Int?>? {
         return if (input.contains('-')) {

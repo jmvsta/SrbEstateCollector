@@ -355,7 +355,7 @@ class TelegramCommandsTest {
         assertNotNull(row)
         assertEquals("Balkan Flat", row!![FiltersTable.name])
         assertEquals(City.BEOGRAD.code, row[FiltersTable.city])
-        assertEquals(2, row[FiltersTable.minRooms])
+        assertEquals(2.0, row[FiltersTable.minRooms])
         assertNull(row[FiltersTable.maxRooms])
         assertEquals(400, row[FiltersTable.minPrice])
         assertEquals(800, row[FiltersTable.maxPrice])
