@@ -56,6 +56,13 @@ tasks.test {
         "--add-opens", "java.base/java.lang.reflect=ALL-UNNAMED"
     )
 }
+
+tasks.jar {
+    manifest { attributes["Main-Class"] = "com.jmvstv_v.MainKt" }
+    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
 kotlin {
-    jvmToolchain(24)
+    jvmToolchain(21)
 }
